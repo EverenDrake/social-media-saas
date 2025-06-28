@@ -10,10 +10,6 @@ const PostsPage = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
 
-  useEffect(() => {
-    loadPosts();
-  }, [filter, loadPosts]);
-
   const loadPosts = useCallback(async () => {
     try {
       setLoading(true);
@@ -27,6 +23,10 @@ const PostsPage = () => {
       setLoading(false);
     }
   }, [posts, filter]);
+
+  useEffect(() => {
+    loadPosts();
+  }, [filter, loadPosts]);
 
   const handleDeletePost = async (postId) => {
     if (!window.confirm('Are you sure you want to delete this post?')) {

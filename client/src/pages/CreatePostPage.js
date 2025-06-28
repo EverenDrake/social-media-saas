@@ -20,11 +20,6 @@ const CreatePostPage = () => {
   });
   const [selectedFiles, setSelectedFiles] = useState([]);
 
-  useEffect(() => {
-    loadSocialAccounts();
-    setDefaultScheduleTime();
-  }, [loadSocialAccounts]);
-
   const loadSocialAccounts = useCallback(async () => {
     try {
       const response = await socialAccounts.getAll();
@@ -34,6 +29,11 @@ const CreatePostPage = () => {
       toast.error('Failed to load social accounts');
     }
   }, [socialAccounts]);
+
+  useEffect(() => {
+    loadSocialAccounts();
+    setDefaultScheduleTime();
+  }, [loadSocialAccounts]);
 
   const setDefaultScheduleTime = () => {
     const now = new Date();

@@ -16,10 +16,6 @@ const SocialAccountsPage = () => {
     accountId: ''
   });
 
-  useEffect(() => {
-    loadAccounts();
-  }, [loadAccounts]);
-
   const loadAccounts = useCallback(async () => {
     try {
       setLoading(true);
@@ -32,6 +28,10 @@ const SocialAccountsPage = () => {
       setLoading(false);
     }
   }, [socialAccounts]);
+
+  useEffect(() => {
+    loadAccounts();
+  }, [loadAccounts]);
 
   const handleConnect = async (e) => {
     e.preventDefault();
