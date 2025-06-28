@@ -1,0 +1,27 @@
+{
+  "name": "social-media-saas",
+  "version": "1.0.0",
+  "description": "Complete SaaS platform for social media automation",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm start",
+    "build": "cd client && npm run build",
+    "start": "cd server && npm start",
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install",
+    "build-production": "cd client && npm run build && cd ../server && npm install --production",
+    "docker-build": "docker build -t socialsync .",
+    "docker-run": "docker-compose up -d",
+    "docker-stop": "docker-compose down",
+    "deploy": "npm run build-production && npm run docker-build",
+    "heroku-build": "cd client && npm install && npm run build",
+    "heroku-start": "cd server && npm start"
+  },
+  "keywords": ["social media", "automation", "saas", "scheduling"],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  }
+}
