@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApi } from '../contexts/ApiContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -23,9 +23,9 @@ const CreatePostPage = () => {
   useEffect(() => {
     loadSocialAccounts();
     setDefaultScheduleTime();
-  }, []);
+  }, [loadSocialAccounts]);
 
-  const loadSocialAccounts = async () => {
+  const loadSocialAccounts = useCallback(async () => {
     try {
       const response = await socialAccounts.getAll();
       setAccounts(response.data);
@@ -33,7 +33,7 @@ const CreatePostPage = () => {
       console.error('Error loading social accounts:', error);
       toast.error('Failed to load social accounts');
     }
-  };
+  }, [socialAccounts]);
 
   const setDefaultScheduleTime = () => {
     const now = new Date();

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useApi } from '../contexts/ApiContext';
 import { useAuth } from '../contexts/AuthContext';
 import { PlusIcon, TrashIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
@@ -18,9 +18,9 @@ const SocialAccountsPage = () => {
 
   useEffect(() => {
     loadAccounts();
-  }, []);
+  }, [loadAccounts]);
 
-  const loadAccounts = async () => {
+  const loadAccounts = useCallback(async () => {
     try {
       setLoading(true);
       const response = await socialAccounts.getAll();
@@ -31,7 +31,7 @@ const SocialAccountsPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [socialAccounts]);
 
   const handleConnect = async (e) => {
     e.preventDefault();

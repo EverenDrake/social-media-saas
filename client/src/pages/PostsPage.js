@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useApi } from '../contexts/ApiContext';
 import { PlusIcon, EyeIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
@@ -12,9 +12,9 @@ const PostsPage = () => {
 
   useEffect(() => {
     loadPosts();
-  }, [filter]);
+  }, [filter, loadPosts]);
 
-  const loadPosts = async () => {
+  const loadPosts = useCallback(async () => {
     try {
       setLoading(true);
       const params = filter !== 'all' ? { status: filter } : {};
@@ -26,7 +26,7 @@ const PostsPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [posts, filter]);
 
   const handleDeletePost = async (postId) => {
     if (!window.confirm('Are you sure you want to delete this post?')) {
