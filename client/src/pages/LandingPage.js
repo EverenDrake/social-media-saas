@@ -8,7 +8,7 @@ const LandingPage = () => {
   const { user } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
   const [isVisible, setIsVisible] = useState(false);
-  const [currentFeature, setCurrentFeature] = useState(0);
+  const [, setCurrentFeature] = useState(0);
 
   const features = [
     { icon: ClockIcon, title: 'Smart Scheduling', desc: 'Schedule posts across multiple platforms with optimal timing suggestions.' },
