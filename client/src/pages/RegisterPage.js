@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
 const RegisterPage = () => {
-  const { user, register } = useAuth();
+  const { user, signUp } = useAuth();
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -40,13 +40,14 @@ const RegisterPage = () => {
     setLoading(true);
 
     try {
-      const result = await register(formData.username, formData.email, formData.password);
+const result = await signUp(formData.email, formData.password, formData.username);
       if (result.success) {
-        toast.success('Account created successfully!');
+        // Success toast already handled in signUp
       } else {
-        toast.error(result.message || 'Registration failed');
+        // Error toast already handled in signUp
       }
     } catch (error) {
+      console.error('Registration error:', error);
       toast.error('An error occurred during registration');
     } finally {
       setLoading(false);

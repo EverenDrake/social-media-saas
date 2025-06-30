@@ -2,11 +2,11 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const mongoose = require('mongoose');
 const compression = require('compression');
 const session = require('express-session');
 const passport = require('./config/passport');
 const winston = require('winston');
+const { supabase } = require('./config/supabase');
 require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
@@ -99,13 +99,20 @@ app.use((req, res, next) => {
   next();
 });
 
-// Database connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/social-media-saas', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('Connected to MongoDB'))
-.catch(err => console.error('MongoDB connection error:', err));
+// Test Supabase connection
+(async () => {
+  try {
+    const { data, error } = await supabase.from('profiles').select('count').limit(1);
+    if (error) throw error;
+    console.log('✅ Connected to Supabase');
+  } catch (err) {
+    console.error('❌ Supabase connection failed:', err.message);
+    console.log('📋 To fix this:');
+    console.log('   1. Check your Supabase URL and API keys');
+    console.log('   2. Ensure the database schema is set up');
+    console.log('   3. Run the SQL schema file in Supabase SQL editor');
+  }
+})();
 
 // Routes
 app.use('/api/auth', authRoutes);

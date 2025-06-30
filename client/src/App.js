@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ApiProvider } from './contexts/ApiContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 // Components
 import Navbar from './components/Navbar';
@@ -43,7 +44,7 @@ const Layout = ({ children }) => {
   }
   
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-dark-900 transition-colors">
       <Navbar />
       <div className="flex">
         <Sidebar />
@@ -57,11 +58,12 @@ const Layout = ({ children }) => {
 
 function App() {
   return (
-    <AuthProvider>
-      <ApiProvider>
-        <Router>
-          <Layout>
-            <Routes>
+    <ThemeProvider>
+      <AuthProvider>
+        <ApiProvider>
+          <Router>
+            <Layout>
+              <Routes>
               {/* Public Routes */}
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<LoginPage />} />
@@ -116,12 +118,13 @@ function App() {
                   </ProtectedRoute>
                 } 
               />
-            </Routes>
-          </Layout>
-          <Toaster position="top-right" />
-        </Router>
-      </ApiProvider>
-    </AuthProvider>
+              </Routes>
+            </Layout>
+            <Toaster position="top-right" />
+          </Router>
+        </ApiProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

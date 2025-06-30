@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const AuthContext = createContext();
 
@@ -15,113 +15,120 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState(null);
-
-  // Configure axios defaults
-  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-  axios.defaults.baseURL = API_BASE_URL;
-
-  // Set up axios interceptor for auth token
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    }
-
-    // Response interceptor to handle token expiration
-    const responseInterceptor = axios.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        if (error.response?.status === 401) {
-          logout();
-        }
-        return Promise.reject(error);
-      }
-    );
-
-    return () => {
-      axios.interceptors.response.eject(responseInterceptor);
-    };
-  }, []);
+  const [session, setSession] = useState(null);
 
   // Check if user is logged in on app load
   useEffect(() => {
-    checkAuth();
+    loadUser();
   }, []);
 
-  const checkAuth = async () => {
+  const loadUser = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken');
       if (!token) {
         setLoading(false);
         return;
       }
 
-      const response = await axios.get('/auth/me');
-      setUser(response.data.user);
-      setSubscription(response.data.subscription);
+      const response = await fetch('/api/auth/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user);
+        setSubscription(data.subscription);
+      } else {
+        localStorage.removeItem('authToken');
+      }
     } catch (error) {
-      console.error('Auth check failed:', error);
-      localStorage.removeItem('token');
-      delete axios.defaults.headers.common['Authorization'];
+      console.error('Error loading user:', error);
+      localStorage.removeItem('authToken');
     } finally {
       setLoading(false);
     }
   };
 
-  const login = async (email, password) => {
+  const signIn = async (email, password) => {
     try {
-      const response = await axios.post('/auth/login', { email, password });
-      const { token, user: userData } = response.data;
-
-      localStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      setUser(userData);
-
-      // Fetch subscription data
-      const subResponse = await axios.get('/subscriptions');
-      setSubscription(subResponse.data);
-
-      return { success: true };
-    } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Login failed'
-      };
-    }
-  };
-
-  const register = async (username, email, password) => {
-    try {
-      const response = await axios.post('/auth/register', {
-        username,
-        email,
-        password
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
       });
-      const { token, user: userData } = response.data;
 
-      localStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      setUser(userData);
+      const data = await response.json();
 
-      // Fetch subscription data
-      const subResponse = await axios.get('/subscriptions');
-      setSubscription(subResponse.data);
+      if (!response.ok) {
+        console.error('Login error:', data.message);
+        toast.error(data.message || 'Login failed');
+        return { success: false, message: data.message };
+      }
 
+      localStorage.setItem('authToken', data.token);
+      setUser(data.user);
+      toast.success('Login successful!');
       return { success: true };
     } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Registration failed'
-      };
+      console.error('Login error:', error);
+      toast.error('Login failed');
+      return { success: false, message: error.message };
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization'];
-    setUser(null);
-    setSubscription(null);
+const signUp = async (email, password, username) => {
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password, username }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        console.error('Registration error:', data.message);
+        toast.error(data.message || 'Registration failed');
+        return { success: false, message: data.message };
+      }
+      
+      // Store the token and user data
+      localStorage.setItem('authToken', data.token);
+      setUser(data.user);
+      toast.success('Registration successful!');
+      
+      // Load user subscription data
+      await loadUser();
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Registration error:', error);
+      toast.error('Registration failed');
+      return { success: false, message: error.message };
+    }
   };
+
+  const signOut = async () => {
+    try {
+      localStorage.removeItem('authToken');
+      setUser(null);
+      setSubscription(null);
+      setSession(null);
+      toast.success('Successfully signed out!');
+    } catch (error) {
+      console.error('Sign out error:', error);
+      toast.error('Sign out failed');
+    }
+  };
+
+
+
 
   const updateSubscription = (newSubscription) => {
     setSubscription(newSubscription);
@@ -131,11 +138,12 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     subscription,
-    login,
-    register,
-    logout,
+    session,
+    signIn,
+    signUp,
+    signOut,
     updateSubscription,
-    checkAuth
+    loadUser
   };
 
   return (

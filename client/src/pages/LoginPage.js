@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
 const LoginPage = () => {
-  const { user, login } = useAuth();
+  const { user, signIn } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -27,11 +27,11 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      const result = await login(formData.email, formData.password);
+      const result = await signIn(formData.email, formData.password);
       if (result.success) {
-        toast.success('Welcome back!');
+        // Success toast already handled in signIn
       } else {
-        toast.error(result.message || 'Login failed');
+        // Error toast already handled in signIn
       }
     } catch (error) {
       toast.error('An error occurred during login');
